@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-secondary-200 dark:border-secondary-700;
+  }
+  
+  body {
+    @apply bg-gradient-light dark:bg-gradient-dark text-secondary-900 dark:text-secondary-50;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .nav-item {
+    @apply px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer
+           hover:bg-primary-50 dark:hover:bg-primary-800/20
+           active:bg-primary-100 dark:active:bg-primary-700/30
+           border border-transparent hover:border-primary-200 dark:hover:border-primary-700;
+  }
+  
+  .nav-item.active {
+    @apply bg-primary-100 dark:bg-primary-800/40 border-primary-300 dark:border-primary-600
+           text-primary-700 dark:text-primary-300;
+  }
+  
+  .sub-nav-item {
+    @apply px-3 py-2 rounded-md transition-all duration-200 cursor-pointer
+           hover:bg-accent-50 dark:hover:bg-accent-800/20
+           border border-transparent hover:border-accent-200 dark:hover:border-accent-700;
+  }
+  
+  .sub-nav-item.active {
+    @apply bg-accent-100 dark:bg-accent-800/40 border-accent-300 dark:border-accent-600
+           text-accent-700 dark:text-accent-300;
+  }
+}
