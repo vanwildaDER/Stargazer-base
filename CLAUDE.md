@@ -176,3 +176,55 @@ VITE_VPB_API_KEY={"encrypted":"...","iv":"...","salt":"...","algorithm":"AES-GCM
 - **HTTPS enforcement**: Required for production environments
 - **Token security**: Automatic cache clearing and secure storage
 - **Credential rotation**: Regularly rotate both API keys and master passwords
+
+## Common Issues & Solutions
+
+### Interactive Image Modal Issues
+When implementing click-to-enlarge image functionality in components rendered within SubPanel containers:
+
+**Problem**: Image click handlers not working despite proper event binding
+**Root Cause**: Hover overlay divs with `absolute inset-0` positioning block click events from reaching the image elements
+
+**Solution**:
+```typescript
+// ❌ Incorrect - overlay blocks clicks
+<div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 rounded-lg transition-colors duration-200 flex items-center justify-center">
+  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/90 dark:bg-secondary-800/90 px-3 py-1 rounded-full text-xs font-medium">
+    Click to enlarge
+  </div>
+</div>
+
+// ✅ Correct - pointer-events-none allows clicks through
+<div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 rounded-lg transition-colors duration-200 flex items-center justify-center pointer-events-none">
+  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/90 dark:bg-secondary-800/90 px-3 py-1 rounded-full text-xs font-medium">
+    Click to enlarge
+  </div>
+</div>
+```
+
+**Implementation Pattern**:
+```typescript
+// Use createPortal for modals to bypass container overflow restrictions
+import { createPortal } from 'react-dom';
+
+// Modal rendered to document.body to avoid z-index and overflow issues
+{selectedImage && createPortal(
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+    {/* Modal content */}
+  </div>,
+  document.body
+)}
+```
+
+**Z-Index Stack Reference**:
+- Header: `z-50`
+- Sidebar: `z-40`  
+- SubPanel: `z-30`
+- TertiaryNavigation: `z-20`
+- Image Modals: `z-[9999]` (highest priority)
+
+**Debugging Steps**:
+1. Add temporary `onClick={() => alert('Image clicked!')}` to test if events fire
+2. Check for overlapping elements with browser dev tools
+3. Verify `pointer-events-none` is applied to hover overlays
+4. Ensure modal uses `createPortal` if rendered within constrained containers

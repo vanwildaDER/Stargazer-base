@@ -11,12 +11,19 @@ export type OperatorType = 'ITS' | 'Betway';
 export class TokenService {
   private static tokenCache: Map<OperatorType, TokenCache> = new Map();
   private static readonly TOKEN_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
-  private static readonly API_ENDPOINT = '/api/tokens';
 
   public static getVpbEndpoint(operator: OperatorType): string {
     const endpointMap = {
       'ITS': '/api/vpb/its',
       'Betway': '/api/vpb/betway'
+    };
+    return endpointMap[operator];
+  }
+
+  private static getTokenEndpoint(operator: OperatorType): string {
+    const endpointMap = {
+      'ITS': '/api/tokens/its',
+      'Betway': '/api/tokens/betway'
     };
     return endpointMap[operator];
   }
@@ -56,8 +63,9 @@ export class TokenService {
   public static async fetchToken(operator: OperatorType): Promise<string> {
     try {
       const apiKey = this.getApiKeyForOperator(operator);
+      const tokenEndpoint = this.getTokenEndpoint(operator);
       
-      const response = await fetch(this.API_ENDPOINT, {
+      const response = await fetch(tokenEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -181,7 +181,7 @@ export const navigationItems: MenuItem[] = [
         name: 'Runbooks', 
         route: '/virtualpitboss/runbooks',
         tertiaryItems: [
-          { id: 'vpb-runbooks-placeholder1', name: 'placeholder1', route: '/virtualpitboss/runbooks/placeholder1' },
+          { id: 'vpb-runbooks-couchbase-document-edit', name: 'How to Edit a VPB Couchbase Document', route: '/virtualpitboss/runbooks/couchbase-document-edit' },
           { id: 'vpb-runbooks-placeholder2', name: 'placeholder2', route: '/virtualpitboss/runbooks/placeholder2' }
         ]
       },
@@ -191,7 +191,8 @@ export const navigationItems: MenuItem[] = [
         route: '/virtualpitboss/scripts',
         tertiaryItems: [
           { id: 'vpb-scripts-single-journey-definition', name: 'Single Journey Definition', route: '/virtualpitboss/scripts/single-journey-definition' },
-          { id: 'vpb-scripts-get-all-journeys', name: 'Get All Journeys', route: '/virtualpitboss/scripts/get-all-journeys' }
+          { id: 'vpb-scripts-get-all-journeys', name: 'Get All Journeys', route: '/virtualpitboss/scripts/get-all-journeys' },
+          { id: 'vpb-scripts-powershell', name: 'PowerShell Scripts', route: '/virtualpitboss/scripts/powershell' }
         ]
       },
       { 
@@ -199,8 +200,8 @@ export const navigationItems: MenuItem[] = [
         name: 'Onboarding', 
         route: '/virtualpitboss/onboarding',
         tertiaryItems: [
-          { id: 'vpb-onboarding-placeholder1', name: 'placeholder1', route: '/virtualpitboss/onboarding/placeholder1' },
-          { id: 'vpb-onboarding-placeholder2', name: 'placeholder2', route: '/virtualpitboss/onboarding/placeholder2' }
+          { id: 'vpb-onboarding-platform-overview', name: 'VPB.Next Platform Overview', route: '/virtualpitboss/onboarding/platform-overview' },
+          { id: 'vpb-onboarding-technical-deepdive', name: 'Technical Deep Dive & Architecture', route: '/virtualpitboss/onboarding/technical-deepdive' }
         ]
       }
     ]

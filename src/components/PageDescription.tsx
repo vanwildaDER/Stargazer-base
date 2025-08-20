@@ -23,25 +23,20 @@ const PageDescription: React.FC<PageDescriptionProps> = ({
   return (
     <div className={`bg-white/60 dark:bg-secondary-800/60 backdrop-blur-sm rounded-xl p-6 
                     border border-secondary-200 dark:border-secondary-700 shadow-lg ${className}`}>
-      <div className="flex items-start space-x-3 mb-4">
-        <div className="flex-shrink-0 p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-          <Info className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-        </div>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
-            {title}
-          </h1>
-          <div className="text-secondary-700 dark:text-secondary-300 leading-relaxed space-y-2">
-            <div dangerouslySetInnerHTML={{ __html: description }} />
-            
-            {codeExample && (
-              <div className="mt-4">
-                <code className="bg-secondary-100 dark:bg-secondary-700 px-3 py-2 rounded-lg text-sm font-mono block overflow-x-auto">
-                  {codeExample}
-                </code>
-              </div>
-            )}
-          </div>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
+          {title}
+        </h1>
+        <div className="text-secondary-700 dark:text-secondary-300 leading-relaxed space-y-2">
+          <div dangerouslySetInnerHTML={{ __html: description }} />
+          
+          {codeExample && (
+            <div className="mt-4">
+              <code className="bg-secondary-100 dark:bg-secondary-700 px-3 py-2 rounded-lg text-sm font-mono block overflow-x-auto">
+                {codeExample}
+              </code>
+            </div>
+          )}
         </div>
       </div>
 

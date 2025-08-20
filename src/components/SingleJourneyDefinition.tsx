@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Download, Send, Copy, CheckCircle, AlertCircle, ChevronDown } from 'lucide-react';
+import { Download, Send, Copy, CheckCircle, AlertCircle, ChevronDown, Image, X } from 'lucide-react';
+import JSONPretty from 'react-json-pretty';
 import { TokenService, OperatorType } from '../services/tokenService';
+import PageDescription from './PageDescription';
 
 const SingleJourneyDefinition: React.FC = () => {
   const [guid, setGuid] = useState<string>('');
@@ -10,6 +12,7 @@ const SingleJourneyDefinition: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
   const [selectedOperator, setSelectedOperator] = useState<OperatorType>('ITS');
   const [tokenStatus, setTokenStatus] = useState<string>('No token');
+  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string; caption: string } | null>(null);
 
   const validateGuid = (guid: string): boolean => {
     const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -115,20 +118,115 @@ const SingleJourneyDefinition: React.FC = () => {
 
   return (
     <div className="w-full p-6 space-y-6">
+      <PageDescription
+        title="Single Journey Definition"
+        description="<p>This tool gets a single journey definition for the selected Operator. The tool calls a GET command to the VirtualPitBoss endpoint with a specific Journey GUID to retrieve detailed journey configuration and rules.</p>"
+        codeExample="http://api3.mit.mgsops.com:7725/Account/VirtualPitBoss/v1/journeys/{guid}"
+      />
+
       <div className="bg-white/60 dark:bg-secondary-800/60 backdrop-blur-sm rounded-xl p-6 
                       border border-secondary-200 dark:border-secondary-700 shadow-lg">
-        <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-4">
-          Single Journey Definition
-        </h1>
-        <p className="text-secondary-700 dark:text-secondary-300 leading-relaxed">
-          Get MIT single journey definition for selected Operator. This tool calls a GET command to the 
-          VirtualPitBoss <code className="bg-secondary-100 dark:bg-secondary-700 px-2 py-1 rounded text-sm font-mono">
-          http://api3.mit.mgsops.com:7725/Account/VirtualPitBoss/v1/journeys/
-          </code> endpoint with a specific Journey GUID.
-        </p>
+        <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+          WHAT IS A JOURNEY DEFINITION?
+        </h3>
+        <div className="text-secondary-700 dark:text-secondary-300 leading-relaxed space-y-4">
+          <p>
+            A journey definition is the configuration used by the VPB SF Application. It contains all the information, such as <strong>Initiating Triggers</strong>, <strong>Start Date</strong>, <strong>End Date</strong>, <strong>Event conditions</strong>, etc., all that is required to take a player on Journey. The configuration is in JSON format.
+          </p>
+          <p>
+            Below are samples of how the Journey setup looks like in the H5 UI, where you can create a journey, so you can understand how it translates into the json config as also seen in the sample below. <strong>The tool in this page will get you live json data out of the SF App, via the VPB API.</strong>
+          </p>
+        </div>
+        
+        <div className="mt-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <Image className="w-5 h-5 text-secondary-500" />
+            <h4 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+              Visual Examples
+            </h4>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <div className="relative group cursor-pointer"
+                   onClick={(e) => {
+                     e.preventDefault();
+                     console.log('Image clicked!'); // Debug log
+                     setSelectedImage({
+                       src: "./Assets/JourneyDescription.png",
+                       alt: "Journey Configuration UI",
+                       caption: "H5 UI showing journey configuration parameters including triggers, dates, and player conditions"
+                     });
+                   }}>
+                <img
+                  src="./Assets/JourneyDescription.png"
+                  alt="Journey Configuration UI"
+                  className="w-full h-48 object-cover rounded-lg border border-secondary-200 dark:border-secondary-700
+                           transition-transform duration-200 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 rounded-lg pointer-events-none" />
+              </div>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 text-center">
+                H5 UI showing journey configuration parameters including triggers, dates, and player conditions
+              </p>
+            </div>
+            <div className="space-y-2">
+              <div className="relative group cursor-pointer"
+                   onClick={(e) => {
+                     e.preventDefault();
+                     console.log('Workflow image clicked!');
+                     setSelectedImage({
+                       src: "./Assets/JourneyWorkflow.png",
+                       alt: "Journey Workflow Designer",
+                       caption: "Visual workflow designer showing journey steps, branching logic, and event conditions"
+                     });
+                   }}>
+                <img
+                  src="./Assets/JourneyWorkflow.png"
+                  alt="Journey Workflow Designer"
+                  className="w-full h-48 object-cover rounded-lg border border-secondary-200 dark:border-secondary-700
+                           transition-transform duration-200 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 rounded-lg pointer-events-none" />
+              </div>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 text-center">
+                Visual workflow designer showing journey steps, branching logic, and event conditions
+              </p>
+            </div>
+            <div className="space-y-2">
+              <div className="relative group cursor-pointer"
+                   onClick={(e) => {
+                     e.preventDefault();
+                     console.log('JSON image clicked!');
+                     setSelectedImage({
+                       src: "./Assets/JourneyJSON.png",
+                       alt: "Journey JSON Configuration", 
+                       caption: "Live JSON data structure showing how the UI configuration translates to API format"
+                     });
+                   }}>
+                <img
+                  src="./Assets/JourneyJSON.png"
+                  alt="Journey JSON Configuration"
+                  className="w-full h-48 object-cover rounded-lg border border-secondary-200 dark:border-secondary-700
+                           transition-transform duration-200 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 rounded-lg pointer-events-none" />
+              </div>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 text-center">
+                Live JSON data structure showing how the UI configuration translates to API format
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white/60 dark:bg-secondary-800/60 backdrop-blur-sm rounded-xl p-6 
+                      border border-secondary-200 dark:border-secondary-700 shadow-lg">
+        <h2 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+          Journey Request
+        </h2>
         
         {/* Operator Selection */}
-        <div className="mt-4">
+        <div className="mb-6">
           <label htmlFor="operator-select" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
             Select Operator <span className="text-red-500">*</span>
           </label>
@@ -151,13 +249,6 @@ const SingleJourneyDefinition: React.FC = () => {
             Token Status: <span className="font-medium">{tokenStatus}</span>
           </div>
         </div>
-      </div>
-
-      <div className="bg-white/60 dark:bg-secondary-800/60 backdrop-blur-sm rounded-xl p-6 
-                      border border-secondary-200 dark:border-secondary-700 shadow-lg">
-        <h2 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
-          Journey Request
-        </h2>
         
         <div className="flex gap-3 mb-4">
           <div className="flex-1">
@@ -240,10 +331,58 @@ const SingleJourneyDefinition: React.FC = () => {
             </div>
           </div>
           
+          <div className="mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+            <div className="text-yellow-800 dark:text-yellow-200 text-sm">
+              <strong>JSON Result:</strong> Single journey definition with complete configuration. 
+              Use Copy or Download buttons to save the data.
+              <br />
+              <div className="mt-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                Size: {((JSON.stringify(results).length) / 1024).toFixed(1)} KB • 
+                Complete journey configuration
+              </div>
+            </div>
+          </div>
+          
           <div className="bg-secondary-50 dark:bg-secondary-900/50 rounded-lg p-4 max-h-96 overflow-y-auto">
-            <pre className="text-sm text-secondary-800 dark:text-secondary-200 whitespace-pre-wrap font-mono">
-              {JSON.stringify(results, null, 2)}
-            </pre>
+            <JSONPretty 
+              data={results}
+              theme={{
+                main: 'line-height:1.4;color:#374151;background:transparent;overflow:auto;font-family:ui-monospace,SFMono-Regular,monospace;',
+                error: 'line-height:1.4;color:#dc2626;background:transparent;',
+                key: 'color:#2563eb;font-weight:600;',
+                string: 'color:#059669;',
+                value: 'color:#dc2626;font-weight:500;',
+                boolean: 'color:#7c3aed;font-weight:500;',
+                null: 'color:#7c3aed;font-weight:500;',
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+             onClick={() => setSelectedImage(null)}>
+          <div className="relative max-w-6xl max-h-[90vh] bg-white dark:bg-secondary-800 rounded-xl overflow-hidden shadow-2xl"
+               onClick={(e) => e.stopPropagation()}>
+            <div className="absolute top-4 right-4 z-10">
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors duration-200"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <img
+              src={selectedImage.src}
+              alt={selectedImage.alt}
+              className="w-full h-full object-contain"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+              <h3 className="text-white font-semibold text-lg mb-2">{selectedImage.alt}</h3>
+              <p className="text-white/80 text-sm">{selectedImage.caption}</p>
+            </div>
           </div>
         </div>
       )}

@@ -5,6 +5,10 @@ import { SubMenuItem } from '../types';
 import TertiaryNavigation from './TertiaryNavigation';
 import GetAllJourneys from './GetAllJourneys';
 import SingleJourneyDefinition from './SingleJourneyDefinition';
+import VPBNextOverview from './VPBNextOverview';
+import VPBTechnicalDeepDive from './VPBTechnicalDeepDive';
+import VPBCouchbaseDocumentRunbook from './VPBCouchbaseDocumentRunbook';
+import VPBPowershellScripts from './VPBPowershellScripts';
 
 interface SubPanelProps {
   activeMainItem: string | null;
@@ -117,6 +121,22 @@ const SubPanel: React.FC<SubPanelProps> = ({
             ) : activeTertiaryItem === 'vpb-scripts-single-journey-definition' ? (
               <div className="p-6 overflow-y-auto flex-1">
                 <SingleJourneyDefinition />
+              </div>
+            ) : activeTertiaryItem === 'vpb-onboarding-platform-overview' ? (
+              <div className="overflow-y-auto flex-1">
+                <VPBNextOverview />
+              </div>
+            ) : activeTertiaryItem === 'vpb-onboarding-technical-deepdive' ? (
+              <div className="overflow-y-auto flex-1">
+                <VPBTechnicalDeepDive />
+              </div>
+            ) : activeTertiaryItem === 'vpb-runbooks-couchbase-document-edit' ? (
+              <div className="overflow-y-auto flex-1">
+                <VPBCouchbaseDocumentRunbook />
+              </div>
+            ) : activeTertiaryItem === 'vpb-scripts-powershell' ? (
+              <div className="overflow-y-auto flex-1">
+                <VPBPowershellScripts />
               </div>
             ) : (
               <div className="p-6">

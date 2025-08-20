@@ -40,19 +40,35 @@ export default defineConfig({
           });
         },
       },
-      '/api/tokens': {
-        target: 'http://api2.mal.mgsops.com:7725',
+      '/api/tokens/its': {
+        target: 'http://api3.mit.mgsops.com:7725',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/tokens/, '/System/OperatorSecurity/v1/operatortokens'),
+        rewrite: (path) => path.replace(/^\/api\/tokens\/its/, '/System/OperatorSecurity/v1/operatortokens'),
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
-            console.log('Token proxy error', err);
+            console.log('ITS Token proxy error', err);
           });
           proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Sending Token Request:', req.method, req.url);
+            console.log('Sending ITS Token Request:', req.method, req.url);
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('Received Token Response:', proxyRes.statusCode, req.url);
+            console.log('Received ITS Token Response:', proxyRes.statusCode, req.url);
+          });
+        },
+      },
+      '/api/tokens/betway': {
+        target: 'http://api2.mal.mgsops.com:7725',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/tokens\/betway/, '/System/OperatorSecurity/v1/operatortokens'),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('Betway Token proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Betway Token Request:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Betway Token Response:', proxyRes.statusCode, req.url);
           });
         },
       }
