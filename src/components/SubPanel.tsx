@@ -2,13 +2,9 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { navigationItems } from '../data/navigation';
 import { SubMenuItem } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 import TertiaryNavigation from './TertiaryNavigation';
-import GetAllJourneys from './GetAllJourneys';
-import SingleJourneyDefinition from './SingleJourneyDefinition';
-import VPBNextOverview from './VPBNextOverview';
-import VPBTechnicalDeepDive from './VPBTechnicalDeepDive';
-import VPBCouchbaseDocumentRunbook from './VPBCouchbaseDocumentRunbook';
-import VPBPowershellScripts from './VPBPowershellScripts';
+import PageRenderer from './PageRenderer';
 
 interface SubPanelProps {
   activeMainItem: string | null;
@@ -27,6 +23,7 @@ const SubPanel: React.FC<SubPanelProps> = ({
   onTertiaryItemClick, 
   onClose 
 }) => {
+  const { hasPermission } = useAuth();
   const handleKeyDown = (event: React.KeyboardEvent, subItemId: string) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -49,7 +46,13 @@ const SubPanel: React.FC<SubPanelProps> = ({
   const mainItem = navigationItems.find(item => item.id === activeMainItem);
   if (!mainItem) return null;
 
-  const currentSubItem = activeSubItem ? mainItem.subItems.find(sub => sub.id === activeSubItem) : null;
+  // Filter sub-items based on permissions
+  const visibleSubItems = mainItem.subItems.filter((subItem: SubMenuItem) => {
+    if (!subItem.permissions || subItem.permissions.length === 0) return true;
+    return subItem.permissions.some(permission => hasPermission(permission));
+  });
+
+  const currentSubItem = activeSubItem ? visibleSubItems.find(sub => sub.id === activeSubItem) : null;
 
   return (
     <>
@@ -83,7 +86,7 @@ const SubPanel: React.FC<SubPanelProps> = ({
         
         <nav className="space-y-1" role="tablist" aria-label={`${mainItem.name} options`}>
           <div className="flex space-x-1 mb-4 bg-white/50 dark:bg-secondary-700/50 rounded-lg p-1 backdrop-blur-sm">
-            {mainItem.subItems.map((subItem: SubMenuItem) => (
+            {visibleSubItems.map((subItem: SubMenuItem) => (
               <button
                 key={subItem.id}
                 onClick={() => onSubItemClick(subItem.id)}
@@ -114,29 +117,9 @@ const SubPanel: React.FC<SubPanelProps> = ({
             aria-labelledby={activeSubItem ? `tab-${activeSubItem}` : undefined}
             tabIndex={0}
           >
-            {activeTertiaryItem === 'vpb-scripts-get-all-journeys' ? (
-              <div className="p-6 overflow-y-auto flex-1">
-                <GetAllJourneys />
-              </div>
-            ) : activeTertiaryItem === 'vpb-scripts-single-journey-definition' ? (
-              <div className="p-6 overflow-y-auto flex-1">
-                <SingleJourneyDefinition />
-              </div>
-            ) : activeTertiaryItem === 'vpb-onboarding-platform-overview' ? (
+            {activeTertiaryItem ? (
               <div className="overflow-y-auto flex-1">
-                <VPBNextOverview />
-              </div>
-            ) : activeTertiaryItem === 'vpb-onboarding-technical-deepdive' ? (
-              <div className="overflow-y-auto flex-1">
-                <VPBTechnicalDeepDive />
-              </div>
-            ) : activeTertiaryItem === 'vpb-runbooks-couchbase-document-edit' ? (
-              <div className="overflow-y-auto flex-1">
-                <VPBCouchbaseDocumentRunbook />
-              </div>
-            ) : activeTertiaryItem === 'vpb-scripts-powershell' ? (
-              <div className="overflow-y-auto flex-1">
-                <VPBPowershellScripts />
+                <PageRenderer currentPageId={activeTertiaryItem} />
               </div>
             ) : (
               <div className="p-6">
