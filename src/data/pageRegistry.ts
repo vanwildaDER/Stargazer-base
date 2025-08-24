@@ -16,6 +16,46 @@ interface PageDefinition {
 
 // Master page registry - edit this to move pages or add new ones
 export const pageRegistry: PageDefinition[] = [
+  // Sample placeholder pages for demo
+  {
+    id: 'glops-general-placeholder1',
+    name: 'GLOPS General Overview',
+    route: '/glops-general/general/placeholder1',
+    section: 'glops-general',
+    category: 'general',
+    order: 1,
+    description: 'General GLOPS management and overview tools'
+  },
+  {
+    id: 'banking-monitoring-placeholder1',
+    name: 'Banking Transaction Monitor',
+    route: '/banking/monitoring/placeholder1',
+    section: 'banking',
+    category: 'monitoring',
+    order: 1,
+    description: 'Real-time banking transaction monitoring dashboard'
+  },
+  {
+    id: 'sports-runbooks-rabbitmq-restart',
+    name: 'RabbitMQ Fixture Queue Restart',
+    route: '/sports/runbooks/rabbitmq-restart',
+    component: 'SportsRabbitMQRestartRunbook',
+    section: 'sports',
+    category: 'runbooks',
+    order: 1,
+    description: 'Complete runbook for restarting Trading RabbitMQ fixture queues during build-up alerts'
+  },
+  {
+    id: 'sports-scripts-rabbitmq-reader',
+    name: 'Read RabbitMQ Queues',
+    route: '/sports/scripts/rabbitmq-reader',
+    component: 'SportsReadRabbitMQQueues',
+    section: 'sports',
+    category: 'scripts',
+    order: 1,
+    description: 'API tool for reading RabbitMQ queue status when the UI is too slow or unresponsive'
+  },
+  
   // VPB Pages
   {
     id: 'vpb-runbooks-couchbase-document-edit',
@@ -23,7 +63,7 @@ export const pageRegistry: PageDefinition[] = [
     route: '/virtualpitboss/runbooks/couchbase-document-edit',
     component: 'VPBCouchbaseDocumentRunbook',
     section: 'virtualpitboss',
-    category: 'runbooks',
+    category: 'onboarding',
     order: 1,
     description: 'Step-by-step guide for editing VPB Couchbase documents'
   },
@@ -252,5 +292,7 @@ export const componentMap: Record<string, () => Promise<any>> = {
   GetAllJourneys: () => import('../components/GetAllJourneys'),
   VPBPowershellScripts: () => import('../components/VPBPowershellScripts'),
   VPBNextOverview: () => import('../components/VPBNextOverview'),
-  VPBTechnicalDeepDive: () => import('../components/VPBTechnicalDeepDive')
+  VPBTechnicalDeepDive: () => import('../components/VPBTechnicalDeepDive'),
+  SportsRabbitMQRestartRunbook: () => import('../components/SportsRabbitMQRestartRunbook'),
+  SportsReadRabbitMQQueues: () => import('../components/SportsReadRabbitMQQueues')
 };

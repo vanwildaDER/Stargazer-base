@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useMemo } from 'react';
 import { componentMap, pageRegistry } from '../data/pageRegistry';
 import PageTemplate from './_PageTemplate';
+import UnderConstructionPage from './UnderConstructionPage';
 
 interface PageRendererProps {
   currentPageId: string;
@@ -56,10 +57,36 @@ const PageRenderer: React.FC<PageRendererProps> = ({ currentPageId }) => {
   );
 
   if (!pageDefinition) {
+    // If no page definition found, but it's a placeholder, show under construction
+    if (currentPageId.includes('placeholder')) {
+      // Extract section and category from the page ID
+      const parts = currentPageId.split('-');
+      const section = parts.length > 2 ? parts.slice(0, -2).join('-') : 'this section';
+      const category = parts.length > 1 ? parts[parts.length - 2] : 'feature';
+      
+      return (
+        <UnderConstructionPage 
+          title="Coming Soon"
+          section={section}
+          category={category}
+        />
+      );
+    }
     return <NotFoundPage />;
   }
 
   if (!LazyComponent) {
+    // For placeholder pages or pages without components, show under construction
+    if (pageDefinition.name.toLowerCase().includes('placeholder') || !pageDefinition.component) {
+      return (
+        <UnderConstructionPage 
+          title={pageDefinition.name}
+          section={pageDefinition.section}
+          category={pageDefinition.category}
+        />
+      );
+    }
+
     return (
       <PageTemplate 
         title={pageDefinition.name}
