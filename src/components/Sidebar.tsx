@@ -1,6 +1,7 @@
 import React from 'react';
 import { navigationItems } from '../data/navigation';
 import { MenuItem } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
   activeMainItem: string | null;
@@ -8,12 +9,20 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeMainItem, onMainItemClick }) => {
+  const { hasPermission } = useAuth();
+  
   const handleKeyDown = (event: React.KeyboardEvent, itemId: string) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onMainItemClick(itemId);
     }
   };
+
+  // Filter navigation items based on permissions
+  const visibleNavigationItems = navigationItems.filter((item: MenuItem) => {
+    if (!item.permissions || item.permissions.length === 0) return true;
+    return item.permissions.some(permission => hasPermission(permission));
+  });
 
   return (
     <aside 
@@ -27,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeMainItem, onMainItemClick }) =>
           Navigation
         </h2>
         <nav className="space-y-2" role="list">
-          {navigationItems.map((item: MenuItem) => (
+          {visibleNavigationItems.map((item: MenuItem) => (
             <button
               key={item.id}
               className={`nav-item group relative overflow-hidden w-full text-left p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-700 transition-all duration-200 ${activeMainItem === item.id ? 'active' : ''}`}

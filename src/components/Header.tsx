@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import { UserProfile } from './auth/UserProfile';
 
 interface HeaderProps {
   onLogoClick: () => void;
@@ -42,6 +43,7 @@ const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
             Global Operations Management
           </span>
           <ThemeToggle />
+          <UserProfile />
         </div>
       </div>
     </header>

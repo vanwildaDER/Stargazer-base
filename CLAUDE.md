@@ -113,6 +113,8 @@ The app supports role-based access for:
 
 ## API Key Management & Security
 
+ALWAYS save sensitive values in the .env file of the project. Examples of sensitive values would be usernames , password , API keys. IF you find them , stop and ask for permission to change the value to a variable in the code and save the values in the .env file.
+
 ### Environment Configuration
 API keys are managed through environment variables with strict security practices:
 

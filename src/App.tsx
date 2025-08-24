@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { LoginCallback } from './components/auth/LoginCallback';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import SubPanel from './components/SubPanel';
@@ -66,57 +70,73 @@ function App() {
     });
   };
 
-  return (
-    <ErrorBoundary onError={handleError}>
-      <div className="min-h-screen bg-gradient-light dark:bg-gradient-dark">
+  const DashboardLayout = () => (
+    <div className="min-h-screen bg-gradient-light dark:bg-gradient-dark">
+      <ErrorBoundary fallback={
+        <div className="fixed top-0 left-0 right-0 bg-red-100 dark:bg-red-900/30 border-b border-red-300 dark:border-red-700 p-3 text-center z-50">
+          <span className="text-red-800 dark:text-red-300 text-sm font-medium">
+            Header component encountered an error. Please refresh the page.
+          </span>
+        </div>
+      }>
+        <Header onLogoClick={handleLogoClick} />
+      </ErrorBoundary>
+      
+      <div className="relative">
         <ErrorBoundary fallback={
-          <div className="fixed top-0 left-0 right-0 bg-red-100 dark:bg-red-900/30 border-b border-red-300 dark:border-red-700 p-3 text-center z-50">
-            <span className="text-red-800 dark:text-red-300 text-sm font-medium">
-              Header component encountered an error. Please refresh the page.
-            </span>
+          <div className="pt-16 pb-8 px-8 pl-80 flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
+                Dashboard Unavailable
+              </h2>
+              <p className="text-secondary-600 dark:text-secondary-400">
+                The main dashboard is temporarily unavailable. Please try refreshing the page.
+              </p>
+            </div>
           </div>
         }>
-          <Header onLogoClick={handleLogoClick} />
+          <MainContent 
+            isSubPanelOpen={!!activeMainItem} 
+            isTertiaryNavOpen={!!activeSubItem} 
+          />
         </ErrorBoundary>
         
-        <div className="relative">
-          <ErrorBoundary fallback={
-            <div className="pt-16 pb-8 px-8 pl-80 flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
-                  Dashboard Unavailable
-                </h2>
-                <p className="text-secondary-600 dark:text-secondary-400">
-                  The main dashboard is temporarily unavailable. Please try refreshing the page.
-                </p>
-              </div>
-            </div>
-          }>
-            <MainContent 
-              isSubPanelOpen={!!activeMainItem} 
-              isTertiaryNavOpen={!!activeSubItem} 
-            />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <Sidebar 
-              activeMainItem={activeMainItem}
-              onMainItemClick={handleMainItemClick}
-            />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <SubPanel
-              activeMainItem={activeMainItem}
-              activeSubItem={activeSubItem}
-              activeTertiaryItem={activeTertiaryItem}
-              onSubItemClick={handleSubItemClick}
-              onTertiaryItemClick={handleTertiaryItemClick}
-              onClose={handleSubPanelClose}
-            />
-          </ErrorBoundary>
-        </div>
+        <ErrorBoundary>
+          <Sidebar 
+            activeMainItem={activeMainItem}
+            onMainItemClick={handleMainItemClick}
+          />
+        </ErrorBoundary>
+        
+        <ErrorBoundary>
+          <SubPanel
+            activeMainItem={activeMainItem}
+            activeSubItem={activeSubItem}
+            activeTertiaryItem={activeTertiaryItem}
+            onSubItemClick={handleSubItemClick}
+            onTertiaryItemClick={handleTertiaryItemClick}
+            onClose={handleSubPanelClose}
+          />
+        </ErrorBoundary>
       </div>
+    </div>
+  );
+
+  return (
+    <ErrorBoundary onError={handleError}>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login/callback" element={<LoginCallback />} />
+          <Route 
+            path="/*" 
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
