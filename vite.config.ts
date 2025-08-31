@@ -71,6 +71,26 @@ export default defineConfig({
             console.log('Received Betway Token Response:', proxyRes.statusCode, req.url);
           });
         },
+      },
+      '/api/rabbitmq': {
+        target: 'http://astraftblveque.astra.mal.mgsops.com:15672',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/rabbitmq/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('RabbitMQ proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending RabbitMQ Request:', req.method, req.url);
+            // Forward authorization header from the original request
+            if (req.headers.authorization) {
+              proxyReq.setHeader('Authorization', req.headers.authorization);
+            }
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received RabbitMQ Response:', proxyRes.statusCode, req.url);
+          });
+        },
       }
     }
   },

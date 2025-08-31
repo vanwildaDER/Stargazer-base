@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Play, Copy, Database, AlertCircle, CheckCircle, Clock, Server, Activity, Users } from 'lucide-react';
+import { Play, Copy, Database, AlertCircle, CheckCircle, Clock, Server, Activity, Users, ChevronDown } from 'lucide-react';
 import PageDescription from './PageDescription';
+import { rabbitMQHosts, MANUAL_SELECTION_ID, type RabbitMQHost } from '../config/rabbitmqHosts';
 
 interface QueueResult {
   name: string;
@@ -21,14 +22,39 @@ interface ApiResponse {
 }
 
 const SportsReadRabbitMQQueues: React.FC = () => {
-  const [rabbitHost, setRabbitHost] = useState(import.meta.env.VITE_RABBITMQ_HOST || 'astraftblveque.astra.mal.mgsops.com');
-  const [port, setPort] = useState(import.meta.env.VITE_RABBITMQ_PORT || '15672');
-  const [username, setUsername] = useState(import.meta.env.VITE_RABBITMQ_USERNAME || '');
-  const [password, setPassword] = useState(import.meta.env.VITE_RABBITMQ_PASSWORD || '');
+  const [selectedHostId, setSelectedHostId] = useState<string>(rabbitMQHosts[0]?.id || MANUAL_SELECTION_ID);
+  const [rabbitHost, setRabbitHost] = useState('');
+  const [port, setPort] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [minMessages, setMinMessages] = useState(10);
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [copiedText, setCopiedText] = useState('');
+
+  const isManualSelection = selectedHostId === MANUAL_SELECTION_ID;
+  const selectedHost = rabbitMQHosts.find(host => host.id === selectedHostId);
+
+  const handleHostSelection = (hostId: string) => {
+    setSelectedHostId(hostId);
+    
+    if (hostId === MANUAL_SELECTION_ID) {
+      setRabbitHost('');
+      setPort('');
+      setUsername('');
+      setPassword('');
+      setMinMessages(10);
+    } else {
+      const host = rabbitMQHosts.find(h => h.id === hostId);
+      if (host) {
+        setRabbitHost(host.host);
+        setPort(host.port);
+        setUsername(import.meta.env[host.usernameEnvVar] || '');
+        setPassword(import.meta.env[host.passwordEnvVar] || '');
+        setMinMessages(host.minMessagesThreshold);
+      }
+    }
+  };
 
 
   const copyToClipboard = async (text: string, label: string) => {
@@ -43,10 +69,19 @@ const SportsReadRabbitMQQueues: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
+    
+    // Get current values (either from manual input or selected host)
+    const currentHost = isManualSelection ? rabbitHost : selectedHost?.host || '';
+    const currentPort = isManualSelection ? port : selectedHost?.port || '';
+    const currentUsername = isManualSelection ? username : (selectedHost ? import.meta.env[selectedHost.usernameEnvVar] || '' : '');
+    const currentPassword = isManualSelection ? password : (selectedHost ? import.meta.env[selectedHost.passwordEnvVar] || '' : '');
+    
+    if (!currentHost || !currentPort || !currentUsername || !currentPassword) {
       setResponse({
         success: false,
-        error: 'Username and password are required'
+        error: isManualSelection 
+          ? 'All connection details are required for manual selection'
+          : 'Missing environment variables for selected host. Check your .env file.'
       });
       return;
     }
@@ -55,21 +90,20 @@ const SportsReadRabbitMQQueues: React.FC = () => {
     setResponse(null);
 
     try {
-      // Create the RabbitMQ Management API URL
-      const apiUrl = `http://${rabbitHost}:${port}/api/queues`;
+      // Use the Vite proxy endpoint to bypass CORS
+      const apiUrl = '/api/rabbitmq/api/queues';
       
       // Create basic auth header
-      const credentials = btoa(`${username}:${password}`);
+      const credentials = btoa(`${currentUsername}:${currentPassword}`);
       const headers = {
         'Authorization': `Basic ${credentials}`,
         'Content-Type': 'application/json'
       };
 
-      // Make the actual API call
+      // Make the API call through the proxy
       const response = await fetch(apiUrl, {
         method: 'GET',
-        headers: headers,
-        mode: 'cors' // Enable CORS
+        headers: headers
       });
 
       if (!response.ok) {
@@ -151,12 +185,18 @@ const SportsReadRabbitMQQueues: React.FC = () => {
   };
 
   const generatePowerShellScript = () => {
+    const currentHost = isManualSelection ? rabbitHost : selectedHost?.host || '';
+    const currentPort = isManualSelection ? port : selectedHost?.port || '';
+    const currentUsername = isManualSelection ? username : (selectedHost ? import.meta.env[selectedHost.usernameEnvVar] || '' : '');
+    const currentPassword = isManualSelection ? password : (selectedHost ? import.meta.env[selectedHost.passwordEnvVar] || '' : '');
+    const currentMinMessages = isManualSelection ? minMessages : selectedHost?.minMessagesThreshold || 10;
+    
     return `# RabbitMQ Queue Reader Script
-$rabbitUser = '${username || 'your_username'}'
-$rabbitPW = '${password ? '***' : 'your_password'}'
-$rabbitHost = '${rabbitHost}'
-$rabbitPort = '${port}'
-$minMessages = ${minMessages}
+$rabbitUser = '${currentUsername || 'your_username'}'
+$rabbitPW = '${currentPassword ? '***' : 'your_password'}'
+$rabbitHost = '${currentHost}'
+$rabbitPort = '${currentPort}'
+$minMessages = ${currentMinMessages}
 
 # Define RabbitMQ Management API URL and credentials
 $baseUrl = "http://$rabbitHost:$rabbitPort/api/queues"
@@ -218,9 +258,14 @@ try {
         codeExample="http://astraftblveque.astra.mal.mgsops.com:15672/api/queues"
         images={[
           {
-            src: "/api/placeholder/600/300",
-            alt: "RabbitMQ Management Interface",
-            caption: "Example of RabbitMQ Management UI showing queue details"
+            src: "/Assets/AstraQueue1.png",
+            alt: "RabbitMQ Management Overview Dashboard",
+            caption: "RabbitMQ Management UI showing overview statistics, message rates, and global queue counts"
+          },
+          {
+            src: "/Assets/AstraQueue2.png", 
+            alt: "RabbitMQ Queues List View",
+            caption: "Detailed queue listing showing queue names, message counts, consumers, and states - exactly what this tool provides via API"
           }
         ]}
       />
@@ -231,9 +276,39 @@ try {
           <Server className="w-5 h-5" />
           <span>RabbitMQ Configuration</span>
         </h2>
+
+        {/* Host Selection Dropdown */}
+        <div className="mb-6">
+          <label htmlFor="hostSelection" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+            Select RabbitMQ Host
+          </label>
+          <div className="relative inline-block">
+            <select
+              id="hostSelection"
+              value={selectedHostId}
+              onChange={(e) => handleHostSelection(e.target.value)}
+              className="px-4 py-2 pr-10 border border-secondary-300 dark:border-secondary-600 rounded-lg
+                        bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100
+                        focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                        appearance-none cursor-pointer hover:border-primary-400 dark:hover:border-primary-500
+                        transition-colors duration-200 shadow-sm hover:shadow-md"
+              style={{ width: '400px' }}
+            >
+              {rabbitMQHosts.map(host => (
+                <option key={host.id} value={host.id}>
+                  {host.name}
+                </option>
+              ))}
+              <option value={MANUAL_SELECTION_ID}>Select Rabbit Host details Manually</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary-500 dark:text-primary-400 pointer-events-none drop-shadow-sm" />
+          </div>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {isManualSelection && (
+            <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="rabbitHost" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                 RabbitMQ Host <span className="text-red-500">*</span>
@@ -308,7 +383,10 @@ try {
               />
             </div>
           </div>
+          </>
+          )}
 
+          {/* Minimum Messages Threshold - Always visible */}
           <div>
             <label htmlFor="minMessages" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
               Minimum Messages Threshold
@@ -327,6 +405,27 @@ try {
               Only show queues with more than this many messages
             </p>
           </div>
+
+          {!isManualSelection && selectedHost && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
+              <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center space-x-2">
+                <Database className="w-4 h-4" />
+                <span>Selected Host: {selectedHost.name}</span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-blue-700 dark:text-blue-300 font-medium">Host:</span>
+                  <div className="font-mono text-blue-800 dark:text-blue-200">{selectedHost.host}:{selectedHost.port}</div>
+                </div>
+                <div>
+                  <span className="text-blue-700 dark:text-blue-300 font-medium">Username:</span>
+                  <div className="font-mono text-blue-800 dark:text-blue-200">
+                    {import.meta.env[selectedHost.usernameEnvVar] || `[${selectedHost.usernameEnvVar}]`}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex space-x-4">
             <button
@@ -362,21 +461,6 @@ try {
             </button>
           </div>
 
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
-            <div className="flex items-start space-x-2">
-              <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-              <div className="text-sm">
-                <p className="text-blue-800 dark:text-blue-200 font-medium mb-1">Security Note:</p>
-                <p className="text-blue-700 dark:text-blue-300">
-                  Store credentials securely in environment variables. Add to your <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">.env</code> file:
-                </p>
-                <div className="mt-2 bg-blue-100 dark:bg-blue-800/50 rounded p-2 font-mono text-xs">
-                  <div>VITE_RABBITMQ_USERNAME=your_username</div>
-                  <div>VITE_RABBITMQ_PASSWORD=your_password</div>
-                </div>
-              </div>
-            </div>
-          </div>
         </form>
       </div>
 
